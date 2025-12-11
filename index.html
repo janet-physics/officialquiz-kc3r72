@@ -1,307 +1,156 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>物理公式クイズ（3択）</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>物理公式クイズ（MathJax版）</title>
 
-  <!-- MathJax -->
-  <script>
-    window.MathJax = { tex: { inlineMath: [['$','$']] }, svg: { fontCache: 'global' } };
-  </script>
-  <script id="MathJax-script" async
-    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<!-- MathJax v3 読み込み -->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+};
+</script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 
-  <style>
-    :root{
-      --bg:#071026; --card:#0f1724; --accent:#06b6d4; --text:#e6eef6;
-      --muted:#94a3b8; --correct:#4ade80; --wrong:#ef4444;
-      --choice-text:#e0f2fe;
-    }
-    html,body{height:100%;margin:0;font-family: system-ui,-apple-system,'Noto Sans JP',sans-serif;background:linear-gradient(180deg,var(--bg),#071a2b);color:var(--text)}
-    .wrap{max-width:920px;margin:20px auto;padding:18px}
-    h1{margin:0 0 6px 0;font-size:1.4rem}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:16px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
-    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .controls{display:flex;gap:8px;align-items:center}
-    input[type=number]{width:64px;padding:6px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text)}
-    button{cursor:pointer;border-radius:10px;padding:8px 12px;border:none;font-weight:700}
-    .primary{background:var(--accent);color:#042}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
-    .question-area{margin-top:10px}
-    .qhead{display:flex;justify-content:space-between;align-items:center}
-    .phen{font-weight:800;font-size:1.1rem}
-    .meta{color:var(--muted);font-size:0.9rem}
-    .choices{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-    @media(min-width:700px){.choices{grid-template-columns:repeat(2,1fr)}}
-    .choice{background:#334155;border:1px solid transparent;border-radius:10px;padding:12px;font-size:1.05rem;display:flex;align-items:center;gap:10px;transition:all .14s;color:var(--choice-text)}
-    .choice:hover{transform:translateY(-2px)}
-    .choice.disabled{opacity:0.7;pointer-events:none}
-    .choice .label{font-weight:800}
-    .choice.correct{background:var(--correct);color:#052e16;border-color:#2bb673}
-    .choice.wrong{background:var(--wrong);color:#fff;border-color:#c23b3b}
-    .footer{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-top:12px}
-    .timer{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:8px;font-weight:800}
-    .small{color:var(--muted);font-size:0.9rem}
-    #summary{display:none;margin-top:12px}
-    ol{padding-left:1.1rem}
-  </style>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  h1 { text-align:center; }
+  .quiz-container { background:white; padding:20px; border-radius:8px; max-width:650px; margin:auto; }
+  .choices button {
+    display:block; width:100%; margin:10px 0; padding:10px;
+    font-size:18px; border-radius:6px; cursor:pointer;
+    background:#eee; border:1px solid #ccc;
+  }
+  .correct { background:#c8e6c9 !important; } /* 緑 */
+  .wrong { background:#ffcdd2 !important; }   /* 赤 */
+  #result { margin-top:10px; font-size:18px; font-weight:bold; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>物理公式クイズ（3択）</h1>
-        <div class="small">現象に対応する公式を選んでください（全13問・ランダム順）</div>
-      </div>
 
-      <div class="card" style="display:flex;align-items:center;gap:8px">
-        <div class="controls">
-          <label class="small">タイマー（分）</label>
-          <input id="timeMin" type="number" min="0" max="60" value="3"/>
-          <button id="startBtn" class="primary">開始</button>
-          <button id="resetBtn" class="ghost">リセット</button>
-        </div>
-      </div>
-    </div>
+<h1>物理公式クイズ（MathJax版）</h1>
 
-    <div id="quizCard" class="card question-area" aria-live="polite">
-      <div class="qhead">
-        <div>
-          <div class="phen" id="phenomenon">準備中...</div>
-          <div class="meta">問題 <span id="qIndex">0</span> / 13</div>
-        </div>
-        <div style="text-align:right">
-          <div class="timer" id="timerDisplay">--:--</div>
-          <div class="small" style="margin-top:6px">正答数: <span id="score">0</span></div>
-        </div>
-      </div>
+<div class="quiz-container">
+  <p id="question"></p>
+  <div class="choices" id="choices"></div>
+  <p id="result"></p>
+  <button id="nextButton" onclick="nextQuestion()" style="display:none;">次の問題へ</button>
+</div>
 
-      <div class="choices" id="choices" role="list"></div>
+<script>
+/* ===============================
+   ▼ 14問の問題データ（LaTeX 表記）
+=============================== */
 
-      <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <div id="feedback" class="small">開始を押してタイマーを動かしてください。</div>
-        <div style="display:flex;gap:8px">
-          <button id="revealBtn" class="ghost">解答を表示</button>
-          <button id="nextBtn" class="ghost">次へ</button>
-          <button id="finishBtn" class="primary">終了</button>
-        </div>
-      </div>
-    </div>
+const quizData = [
+  { q: "直線電流がつくる磁場", a: "$H=\\frac{I}{2\\pi r}$" },
+  { q: "円形電流がつくる磁場", a: "$H=\\frac{I}{2r}$" },
+  { q: "ソレノイドを流れる電流がつくる磁場", a: "$H=nI$" },
+  { q: "磁場中で電流が受ける力", a: "$F=IBL$" },
+  { q: "ローレンツ力", a: "$f=qvB$" },
+  { q: "ファラデーの電磁誘導の法則", a: "$V=-N\\frac{\\Delta\\Phi}{\\Delta t}$" },
+  { q: "自己誘導", a: "$V=-L\\frac{\\Delta I}{\\Delta t}$" },
+  { q: "相互誘導", a: "$V=-M\\frac{\\Delta I_1}{\\Delta t}$" },
+  { q: "交流電圧の実効値", a: "$V=\\frac{V_0}{\\sqrt{2}}$" },
+  { q: "交流電流の実効値", a: "$I=\\frac{I_0}{\\sqrt{2}}$" },
+  { q: "コイルのリアクタンス", a: "$X=\\omega L$" },
+  { q: "コンデンサーのリアクタンス", a: "$X=\\frac{1}{\\omega C}$" },
+  { q: "共振周波数", a: "$f_0=\\frac{1}{2\\pi\\sqrt{LC}}$" },
+  { q: "半減期", a: "$N=N_0\\left(\\frac{1}{2}\\right)^{t/T}$" }
+];
 
-    <div id="summary" class="card">
-      <h2 style="margin-top:0">結果</h2>
-      <div id="summaryText"></div>
-      <div style="margin-top:12px"><button id="retryBtn" class="primary">もう一度</button></div>
-    </div>
-  </div>
-
-  <script>
-  // ---------- データ ----------
-  const problems = [
-    {phen:'ヤングの実験（明るくなるとき）', correct:1},
-    {phen:'回折格子（明るくなるとき）', correct:2},
-    {phen:'静電気力に関するクーロンの法則', correct:3},
-    {phen:'点電荷がつくる電場の強さ', correct:4},
-    {phen:'導体全体を貫く電気力線の本数', correct:5},
-    {phen:'電場と距離と電位差の関係', correct:6},
-    {phen:'点電荷のまわりの電位', correct:7},
-    {phen:'平行板コンデンサーの電気容量', correct:8},
-    {phen:'コンデンサーにたくわえられる電気量と電位差', correct:9},
-    {phen:'コンデンサー並列接続の合成容量', correct:10},
-    {phen:'コンデンサー直列接続の合成容量', correct:11},
-    {phen:'静電エネルギー', correct:12},
-    {phen:'単位時間に断面を通過する電流の大きさ', correct:13}
-  ];
-
-  const choicesText = {
-    1:'$d \\dfrac{x}{L} = m\\lambda$',
-    2:'$d\\sin\\theta = m\\lambda$',
-    3:'$F = k \\dfrac{q_1 q_2}{r^2}$',
-    4:'$E = k \\dfrac{Q}{r^2}$',
-    5:'$N = 4\\pi k Q$',
-    6:'$E = \\dfrac{V}{d}$',
-    7:'$V = k \\dfrac{Q}{r}$',
-    8:'$C = \\varepsilon \\dfrac{S}{d}$',
-    9:'$Q = CV$',
-    10:'$C = C_1 + C_2$',
-    11:'$\\dfrac{1}{C} = \\dfrac{1}{C_1} + \\dfrac{1}{C_2}$',
-    12:'$U = \\dfrac{1}{2} C V^2$',
-    13:'$I = e n v S$'
-  };
-
-  const labels = ['①','②','③'];
-
-  // ---------- 以下、クイズロジック（修正版） ----------
-  const phenomenonEl = document.getElementById('phenomenon');
-  const qIndexEl = document.getElementById('qIndex');
-  const choicesEl = document.getElementById('choices');
-  const feedbackEl = document.getElementById('feedback');
-  const scoreEl = document.getElementById('score');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const startBtn = document.getElementById('startBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const revealBtn = document.getElementById('revealBtn');
-  const finishBtn = document.getElementById('finishBtn');
-  const retryBtn = document.getElementById('retryBtn');
-  const summary = document.getElementById('summary');
-  const summaryText = document.getElementById('summaryText');
-  const timeMinInput = document.getElementById('timeMin');
-
-  let order = [];
-  let current = 0;
-  let score = 0;
-  let answered = [];
-  let selectedOption = [];
-  let totalSeconds = 0;
-  let remaining = 0;
-  let timer = null;
-
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playChime(){ const now=audioCtx.currentTime;const a=audioCtx.createOscillator(),b=audioCtx.createOscillator(),g=audioCtx.createGain();a.connect(g);b.connect(g);g.connect(audioCtx.destination);a.type=b.type='sine';a.frequency.value=950;b.frequency.value=720;g.gain.setValueAtTime(0.18,now);g.gain.exponentialRampToValueAtTime(0.0001,now+0.6);a.start(now);a.stop(now+0.32);b.start(now+0.12);b.stop(now+0.6);}
-  function playWrong(){const now=audioCtx.currentTime;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.type='sine';o.frequency.value=180;g.gain.setValueAtTime(0.22,now);g.gain.exponentialRampToValueAtTime(0.0001,now+0.32);o.start(now);o.stop(now+0.32);}
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-  function formatTime(s){const m=Math.floor(s/60).toString().padStart(2,'0');const sec=(s%60).toString().padStart(2,'0');return `${m}:${sec}`;}
-
-  function initQuiz(){
-    order = shuffle([...Array(problems.length).keys()]);
-    current = 0; score = 0;
-    answered = Array(problems.length).fill(false);
-    selectedOption = Array(problems.length).fill(null);
-    scoreEl.textContent = '0';
-    summary.style.display = 'none';
-    document.getElementById('quizCard').style.display = '';
-    stopTimer();
-    timerDisplay.textContent = '--:--';
-    renderQuestion();
-    feedbackEl.textContent = '開始を押してタイマーを動かしてください。';
+/* シャッフル */
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
+}
 
-  function renderQuestion(){
-    const idx = order[current];
-    const q = problems[idx];
-    phenomenonEl.textContent = q.phen;
-    qIndexEl.textContent = (current+1);
+let currentIndex = 0;
+let score = 0;
 
-    const correctNum = q.correct;
-    const pool = Object.keys(choicesText).map(Number).filter(n=>n!==correctNum);
-    shuffle(pool);
-    const options = shuffle([correctNum, pool[0], pool[1]]);
+/* 問題表示 */
+function showQuestion() {
+  const q = quizData[currentIndex];
+  document.getElementById("question").innerHTML = `Q${currentIndex + 1}. ${q.q}`;
 
-    choicesEl.innerHTML = '';
-    options.forEach((choiceVal, pos)=>{
-      const btn = document.createElement('button');
-      btn.className = 'choice';
-      btn.dataset.pos = pos;
-      btn.dataset.choiceVal = choiceVal;
-      btn.innerHTML = `<span class="label">${labels[pos]}</span>&nbsp;<span class="math">${choicesText[choiceVal]}</span>`;
-      btn.addEventListener('click', ()=> onSelect(pos, choiceVal, btn));
-      choicesEl.appendChild(btn);
-    });
+  let choices = [q.a];
 
-    // ★ここで前問のメッセージをリセット
-    feedbackEl.textContent = '';
+  const wrong = quizData
+    .filter(item => item.a !== q.a)
+    .map(item => item.a);
 
-    if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
-  }
+  shuffle(wrong);
+  choices.push(wrong[0], wrong[1]);
+  shuffle(choices);
 
-  function onSelect(pos, choiceVal, btn){
-    const idx = order[current];
-    if(answered[idx]) return;
-    answered[idx] = true;
-    selectedOption[idx] = pos;
-    const buttons = Array.from(choicesEl.children);
-    buttons.forEach(b => b.classList.add('disabled'));
-    const correctVal = problems[idx].correct;
-    if(choiceVal === correctVal){
-      btn.classList.add('correct');
-      score++; scoreEl.textContent = score;
-      feedbackEl.textContent = '正解！';
-      playChime();
-    } else {
-      btn.classList.add('wrong');
-      feedbackEl.textContent = '不正解。';
-      playWrong();
-    }
-  }
+  const choiceDiv = document.getElementById("choices");
+  choiceDiv.innerHTML = "";
 
-  nextBtn.addEventListener('click', ()=>{
-    if(!answered[order[current]]){
-      feedbackEl.textContent = 'まず答えを選んでください（または「解答を表示」）';
-      return;
-    }
-    if(current < order.length - 1){ current++; renderQuestion(); }
-    else { finishQuiz(); }
-  });
+  choices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `<span class='math'>${choice}</span>`;
 
-  revealBtn.addEventListener('click', ()=>{
-    const idx = order[current];
-    const q = problems[idx];
-    const correctVal = q.correct;
-    const buttons = Array.from(choicesEl.children);
-    const correctBtn = buttons.find(b => Number(b.dataset.choiceVal) === correctVal);
-    if(correctBtn && !correctBtn.classList.contains('correct')){
-      correctBtn.classList.add('correct');
-      buttons.forEach(b => b.classList.add('disabled'));
-      answered[idx] = true;
-      feedbackEl.textContent = '正解を表示しました。';
-    }
-  });
-
-  finishBtn.addEventListener('click', finishQuiz);
-
-  function finishQuiz(){
-    stopTimer();
-    document.getElementById('quizCard').style.display = 'none';
-    summary.style.display = '';
-    let html = `<strong>スコア:</strong> ${score} / ${problems.length}<br><ol>`;
-    order.forEach(i=>{
-      const q = problems[i];
-      html += `<li>${q.phen} → <span class="math">${choicesText[q.correct]}</span></li>`;
-    });
-    html += `</ol>`;
-    summaryText.innerHTML = html;
-    if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
-  }
-
-  retryBtn.addEventListener('click', ()=> initQuiz());
-
-  function startTimer(){
-    stopTimer();
-    if(totalSeconds <= 0) return;
-    remaining = totalSeconds;
-    timerDisplay.textContent = formatTime(remaining);
-    timer = setInterval(()=>{
-      remaining--;
-      timerDisplay.textContent = formatTime(Math.max(0, remaining));
-      if(remaining <= 0){
-        stopTimer();
-        feedbackEl.textContent = '時間切れです。結果を表示します。';
-        finishQuiz();
+    btn.onclick = () => {
+      if (choice === q.a) {
+        btn.classList.add("correct");
+        document.getElementById("result").innerText = "正解！";
+        score++;
+      } else {
+        btn.classList.add("wrong");
+        document.getElementById("result").innerText = "不正解…";
       }
-    },1000);
+
+      disableButtons();
+      document.getElementById("nextButton").style.display = "block";
+      MathJax.typeset();
+    };
+
+    choiceDiv.appendChild(btn);
+  });
+
+  MathJax.typeset();
+}
+
+/* ボタン無効化 */
+function disableButtons() {
+  document.querySelectorAll("#choices button").forEach(btn => btn.disabled = true);
+}
+
+/* 次の問題へ */
+function nextQuestion() {
+  currentIndex++;
+  document.getElementById("result").innerText = "";
+  document.getElementById("nextButton").style.display = "none";
+
+  if (currentIndex < quizData.length) {
+    showQuestion();
+  } else {
+    finishQuiz();
   }
-  function stopTimer(){ if(timer){ clearInterval(timer); timer = null; } }
+}
 
-  startBtn.addEventListener('click', ()=>{
-    const min = Number(timeMinInput.value) || 0;
-    totalSeconds = min * 60;
-    if(totalSeconds > 0){ startTimer(); feedbackEl.textContent = 'タイマー開始。がんばって！'; }
-    else { stopTimer(); timerDisplay.textContent = '--:--'; feedbackEl.textContent = '無制限モードです。'; }
-  });
+/* 結果表示 */
+function finishQuiz() {
+  document.querySelector(".quiz-container").innerHTML = `
+    <h2>終了！</h2>
+    <p>あなたの得点： ${score} / ${quizData.length}</p>
+  `;
+  MathJax.typeset();
+}
 
-  resetBtn.addEventListener('click', ()=> initQuiz());
-  initQuiz();
+/* 初回実行 */
+showQuestion();
+</script>
 
-  document.addEventListener('keydown', (e)=>{
-    if(summary.style.display !== 'none') return;
-    if(['1','2','3'].includes(e.key)){
-      const pos = Number(e.key)-1;
-      const btn = Array.from(choicesEl.children).find(b=>Number(b.dataset.pos)===pos);
-      if(btn && !btn.classList.contains('disabled')) btn.click();
-    } else if(e.key==='Enter'){ nextBtn.click(); }
-  });
-  </script>
 </body>
 </html>
